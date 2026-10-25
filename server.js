@@ -175,7 +175,8 @@ const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next))
 const httpError = (message, status = 400) => Object.assign(new Error(message), { status });
 const requireDb = (req, res, next) => pool ? next() : res.status(503).json({ error: 'Marketplace database is not configured yet. Add DATABASE_URL in Render.' });
 const requireAuth = (req, res, next) => req.session.user ? next() : res.status(401).json({ error: 'Please sign in to continue.' });
-const requireRole = role => (req, res, next) => req.session.user && (req.session.user.role === role || req.session.user.role === 'admin') ? next() : res.status(403).json({ error: 'You do not have permission to do that.' });
+// Strict role check. Administrators are not sellers and do not get seller routes; they use /api/admin.
+const requireRole = role => (req, res, next) => req.session.user && req.session.user.role === role ? next() : res.status(403).json({ error: 'You do not have permission to do that.' });
 const requireAdmin = (req, res, next) => req.session.user && req.session.user.role === 'admin' ? next() : res.status(403).json({ error: 'Administrator access is required.' });
 // Checks the database, not the session, so a status change takes effect immediately.
 const requireApprovedSeller = asyncRoute(async (req, res, next) => {
@@ -814,7 +815,7 @@ app.patch('/api/seller/orders/:id/payment', requireDb, requireAuth, requireRole(
 
 // ---------- orders ----------
 app.post('/api/orders', requireDb, requireAuth, asyncRoute(async (req, res) => {
-  if (req.session.user.role === 'seller') return res.status(403).json({ error: 'Seller accounts cannot place buyer orders. Use a buyer account to shop.' });
+  if (req.session.user.role !== 'buyer') return res.status(403).json({ error: 'Only buyer accounts can place orders.' });
   const items = Array.isArray(req.body.items) ? req.body.items : [];
   const deliveryName = clean(req.body.deliveryName, 120), deliveryPhone = clean(req.body.deliveryPhone, 40);
   const deliveryAddress = clean(req.body.deliveryAddress, 1000), notes = clean(req.body.notes, 1000);
