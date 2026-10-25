@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#143c32">
+<meta name="robots" content="noindex">
+<title>Seller dashboard — Kapiri Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/seller.css">
+</head>
+<body class="seller-body">
+<header class="seller-top">
+  <a href="/" class="brand" aria-label="Kapiri Online home"><span class="brand-mark">K</span><span>kapiri<span class="brand-light">online</span></span></a>
+  <div class="seller-top-right">
+    <span id="whoami" class="small muted"></span>
+    <a href="/" class="text-btn">Marketplace</a>
+    <button class="text-btn hidden" id="signOutBtn" type="button">Sign out</button>
+  </div>
+</header>
+<section id="authPanel" class="seller-auth hidden"></section>
+<div id="pageArea" class="seller-layout hidden">
+  <nav class="seller-nav" id="sellerNav" aria-label="Seller sections">
+    <a href="#/overview" data-nav="overview">Overview</a>
+    <a href="#/products" data-nav="products">Products</a>
+    <a href="#/orders" data-nav="orders">Orders</a>
+    <a href="#/customers" data-nav="customers">Customers</a>
+    <a href="#/promos" data-nav="promos">Promo codes</a>
+    <a href="#/plan" data-nav="plan">Plan &amp; billing</a>
+    <a href="#/account" data-nav="account">Account</a>
+  </nav>
+  <main class="seller-main" id="view" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/seller.js" defer></script>
+</body>
+</html>

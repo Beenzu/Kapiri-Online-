@@ -11,6 +11,9 @@ A mobile-friendly, multi-vendor marketplace foundation for Zambia. Built with No
 - Checkout and order history; stock is checked and decremented in a database transaction.
 - Seller order management and order status changes.
 - Admin overview, user listing and seller approvals.
+- Seller dashboard at `/seller`: overview, full product catalogue, product photos, discounts (percentage with optional end date), promo codes, order management with paid/unpaid tracking, a customer list with private notes, and account and password changes.
+- Hot selling products section on the home page, ranked by units sold.
+- Email alert to each seller when an order containing their products is placed.
 - Product reviews limited to buyers with completed purchases (API endpoint).
 - Render Blueprint (`render.yaml`) provisions a web service and PostgreSQL database.
 - Security headers, API rate limiting and health endpoint.
@@ -24,6 +27,24 @@ A mobile-friendly, multi-vendor marketplace foundation for Zambia. Built with No
 5. Sign in using the admin email/password configured in Render. Approve seller accounts in the Marketplace admin screen.
 
 Render may change free database availability, expiry and limits. Check current plan terms in your Render dashboard before relying on free-tier persistence for a live business.
+
+## Email alerts
+
+Sellers receive an email when an order includes their products. Sending uses [Resend](https://resend.com):
+
+1. Create a Resend API key and verify the domain the emails will come from.
+2. In Render, set `RESEND_API_KEY` to the key, `EMAIL_FROM` to a verified sender (for example `Kapiri Online <orders@yourdomain.com>`), and `PUBLIC_URL` to your site address (for example `https://kapiri-online.onrender.com`) so the email links work.
+
+If these are not set, orders still work and the server log records that no email was sent.
+
+## Plans, per-shop orders and the administrator console
+
+- **Shops and orders.** A buyer's order is split by shop. Each shop has its own status (pending, confirmed, processing, ready, shipped, completed, cancelled), its own payment status, and its own platform fee. A shop can only change its own part of an order.
+- **Buyer cancellation.** A buyer can cancel while every shop is still pending. Cancelled stock is returned automatically.
+- **Plans.** Free, Growth and Pro are seeded on first start. Each plan sets the product limit, the features (customer CRM, promo codes, discounts, order emails) and the platform fee. Plans are edited at `/admin` under Plans.
+- **Administrator console.** Sign in with the admin account and open `/admin`. It covers seller approval, suspension and notes, plan assignment, per-seller overrides, invoices, shop order management, product visibility, the email log with retries, and email settings.
+- **Payments.** No payment provider is connected. Assigning a plan creates an invoice that the administrator marks paid when the money arrives. Buyer payment status is recorded per shop.
+- **Email.** Order confirmations (buyers), new-order alerts (sellers), shop status updates (buyers) and cancellations (sellers) are written to a queue and sent by a background worker through Resend. Set `RESEND_API_KEY` and `EMAIL_FROM` to start sending. Until then, messages wait in the queue and are visible in the admin email log.
 
 ## Local development
 
@@ -39,7 +60,7 @@ Open `http://localhost:10000`.
 
 ## Important launch notes
 
-- Product photos are entered as public HTTPS image URLs. The app does not currently upload images to persistent object storage.
+- Product photos are uploaded by sellers (JPEG, PNG or WebP, up to 2 MB; resized in the browser) and stored in the PostgreSQL database, so they survive redeploys. Large or heavy image traffic should move to object storage later.
 - Checkout records orders and stock, but does not charge customers. Mobile money and bank-transfer options are manual arrangements to confirm with sellers. Integrate a supported payment provider before describing payments as automatic.
 - Delivery fees are not calculated by the app; sellers and buyers must agree delivery arrangements.
 - Configure email/SMS/WhatsApp notifications, password reset, seller verification, privacy/terms pages, backups, monitoring and formal security testing before a public commercial launch.
